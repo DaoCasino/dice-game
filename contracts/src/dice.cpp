@@ -103,4 +103,3 @@ void dice::on_finish(uint64_t ses_id) {
 // Required macro call
 // That macro instantiate game contract entry point for given game class
 GAME_CONTRACT(dice::dice)
-
