@@ -17,7 +17,7 @@ void dice::check_params(uint64_t ses_id) const {
 
 uint64_t dice::get_bet_param(uint64_t ses_id, uint16_t param_type) const {
     auto bet_param = *get_param_value(ses_id, param_type);
-    auto default_multiplier = 10000;
+    const auto default_multiplier = 10000;
     auto symbol = get_session_symbol(ses_id);
     auto precision = symbol.precision();
     auto multiplier = 1;
