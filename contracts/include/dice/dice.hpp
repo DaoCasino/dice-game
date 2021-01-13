@@ -101,8 +101,6 @@ private:
     // Check player's game action
     void check_action_params(const std::vector<game_sdk::param_t>& params) const;
 
-    uint64_t get_bet_param(uint64_t ses_id, uint16_t param_type) const;
-
 private:
     // Calculate win coef for given player's choise
     static double get_win_coefficient(dice_number_t num);
