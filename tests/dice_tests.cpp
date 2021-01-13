@@ -449,6 +449,45 @@ BOOST_FIXTURE_TEST_CASE(signidice_2_bad_state_test, dice_tester) try {
 
 } FC_LOG_AND_RETHROW()
 
+BOOST_FIXTURE_TEST_CASE(full_session_success_token_test, dice_tester) try {
+    name player_name = N(player);
+    name token_contract = N(token.kek);
+    std::string token = "KEK";
+
+    allow_token(token, 0, token_contract);
+
+    auto token_kek = symbol(0, "KEK");
+
+    create_player(player_name);
+    link_game(player_name, game_name);
+
+    transfer(N(eosio), player_name, ASSET("10 KEK"));
+    transfer(N(eosio), casino_name, ASSET("1000 KEK"));
+
+    auto casino_balance_before = get_balance(casino_name, token_kek);
+    auto player_balance_before = get_balance(player_name, token_kek);
+
+    auto ses_id = new_game_session(game_name, player_name, casino_id, ASSET("10 KEK"));
+
+    BOOST_REQUIRE_EQUAL(get_balance(game_name, token_kek), ASSET("10 KEK"));
+
+    const auto bet_num = 90;
+    game_action(game_name, ses_id, MAKE_BET_ACTION, { bet_num });
+
+    auto session = get_game_session(game_name, ses_id);
+    BOOST_REQUIRE_EQUAL(session["state"].as<uint32_t>(), 3); // req_signidice_part_1 state
+
+    signidice(game_name, ses_id);
+
+    auto casino_balance_after = get_balance(casino_name, token_kek);
+    auto player_balance_after = get_balance(player_name, token_kek);
+
+    session = get_game_session(game_name, ses_id);
+    BOOST_REQUIRE_EQUAL(session.is_null(), true);
+    BOOST_REQUIRE_EQUAL(casino_balance_before + player_balance_before, casino_balance_after + player_balance_after);
+
+} FC_LOG_AND_RETHROW()
+
 BOOST_FIXTURE_TEST_CASE(dice_rtp_test, dice_tester, *boost::unit_test::disabled()) try {
     BOOST_TEST(get_rtp(1000000, [](){ return 1 + (rand() % 99); }) == 0.978, boost::test_tools::tolerance(0.015));
 } FC_LOG_AND_RETHROW()
