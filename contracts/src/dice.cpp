@@ -16,8 +16,8 @@ void dice::check_params(uint64_t ses_id) const {
 }
 
 void dice::check_bet(uint64_t ses_id) const {
-    const auto min_bet = asset(*get_param_value(ses_id, constant::min_bet_param_type), core_symbol);
-    const auto max_bet = asset(*get_param_value(ses_id, constant::max_bet_param_type), core_symbol);
+    const auto min_bet = asset(*get_param_value(ses_id, constant::min_bet_param_type), get_session_symbol(ses_id));
+    const auto max_bet = asset(*get_param_value(ses_id, constant::max_bet_param_type), get_session_symbol(ses_id));
 
     const auto& session = get_session(ses_id);
     eosio::check(min_bet <= session.deposit, "deposit less than min bet");
@@ -68,7 +68,7 @@ asset dice::get_win_payout(uint64_t ses_id, dice_number_t number) const {
     // Assets can't be multiply to double. Use dirty way.
     win_payout.amount = uint64_t(double(win_payout.amount) * get_win_coefficient(number));
 
-    const auto max_payout = asset(*get_param_value(ses_id, constant::max_payout_param_type), core_symbol);
+    const auto max_payout = asset(*get_param_value(ses_id, constant::max_payout_param_type), get_session_symbol(ses_id));
     return win_payout < max_payout ? win_payout : max_payout;
 }
 
@@ -77,7 +77,7 @@ void dice::on_random(uint64_t ses_id, checksum256 rand) {
     const dice_number_t actual_number = get_prng(std::move(rand))->next(0, 100);
     eosio::print("rand num: ", actual_number, "\n");
 
-    auto payout = zero_asset;
+    auto payout = asset(0, get_session_symbol(ses_id));
 
     const auto bet_number = rolls.get(ses_id).number;
     if (bet_number <= actual_number) { // Win
