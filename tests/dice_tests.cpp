@@ -452,9 +452,24 @@ BOOST_FIXTURE_TEST_CASE(signidice_2_bad_state_test, dice_tester) try {
 BOOST_FIXTURE_TEST_CASE(full_session_success_token_test, dice_tester) try {
     name player_name = N(player);
     name token_contract = N(token.kek);
-    std::string token = "KEK";
+    const std::string token = "KEK";
+    const game_params_type params = {
+        {0, default_min_bet},
+        {1, default_max_bet},
+        {2, default_max_payout}
+    };
 
     allow_token(token, 0, token_contract);
+    BOOST_REQUIRE_EQUAL(
+        success(),
+        push_action(
+            casino_name, N(setgameparam2), { casino_name, N(active) },
+            mvo()
+            ("game_id", 0)
+            ("token", token)
+            ("params", params)
+        )
+    );
 
     auto token_kek = symbol(0, "KEK");
 
@@ -467,9 +482,9 @@ BOOST_FIXTURE_TEST_CASE(full_session_success_token_test, dice_tester) try {
     auto casino_balance_before = get_balance(casino_name, token_kek);
     auto player_balance_before = get_balance(player_name, token_kek);
 
-    auto ses_id = new_game_session(game_name, player_name, casino_id, ASSET("10000 KEK"));
+    auto ses_id = new_game_session(game_name, player_name, casino_id, ASSET("10 KEK"));
 
-    BOOST_REQUIRE_EQUAL(get_balance(game_name, token_kek), ASSET("10000 KEK"));
+    BOOST_REQUIRE_EQUAL(get_balance(game_name, token_kek), ASSET("10 KEK"));
 
     const auto bet_num = 90;
     game_action(game_name, ses_id, MAKE_BET_ACTION, { bet_num });
